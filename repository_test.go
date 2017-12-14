@@ -16,12 +16,13 @@ import (
 	"io/ioutil"
 )
 
-const http_url_key = "BB_HTTP_URL"
-const ssh_url_key = "BB_SSH_URL"
-const project_key = "BB_PROJECT"
-const user_key = "BB_USER"
-const password_key = "BB_PASSWORD"
-const repository_key = "BB_REPOSITORY"
+const HTTP_URL_KEY = "BB_HTTP_URL"
+const SSH_URL_KEY = "BB_SSH_URL"
+const PROJECT_KEY = "BB_PROJECT"
+const USER_KEY = "BB_USER"
+const PASSWORD_KEY = "BB_PASSWORD"
+const REPOSITORY_KEY = "BB_REPOSITORY"
+const CLONE_DIR = "/tmp/bitbucket_test"
 var http_url string
 var ssh_url string
 var project string
@@ -37,18 +38,18 @@ func TestMain(m *testing.M) {
             os.Exit(1)
         }
     }
-    http_url = os.Getenv(http_url_key)
-    exitIfNotSet(http_url, http_url_key)
-	ssh_url = os.Getenv(ssh_url_key)
-	exitIfNotSet(ssh_url, ssh_url_key)
-    project = os.Getenv(project_key)
-    exitIfNotSet(project, project_key)
-    user = os.Getenv(user_key)
-    exitIfNotSet(user, user_key)
-    password = os.Getenv(password_key)
-    exitIfNotSet(password, password_key)
-    repository = os.Getenv(repository_key)
-    exitIfNotSet(repository, repository_key)
+    http_url = os.Getenv(HTTP_URL_KEY)
+    exitIfNotSet(http_url, HTTP_URL_KEY)
+	ssh_url = os.Getenv(SSH_URL_KEY)
+	exitIfNotSet(ssh_url, SSH_URL_KEY)
+    project = os.Getenv(PROJECT_KEY)
+    exitIfNotSet(project, PROJECT_KEY)
+    user = os.Getenv(USER_KEY)
+    exitIfNotSet(user, USER_KEY)
+    password = os.Getenv(PASSWORD_KEY)
+    exitIfNotSet(password, PASSWORD_KEY)
+    repository = os.Getenv(REPOSITORY_KEY)
+    exitIfNotSet(repository, REPOSITORY_KEY)
     urlRepos = http_url + "/rest/api/1.0/projects/" + project + "/repos"
 
 	status := godog.RunWithOptions("repositories", func(s *godog.Suite) {
@@ -64,7 +65,6 @@ func TestMain(m *testing.M) {
 	}
 	os.Exit(status)
 }
-
 
 type RepositoryCreation struct {
 	Name    	string `json:"name"`
@@ -140,14 +140,17 @@ func deleteRepository(repositoryName string) error {
 }
 
 func cloneRepo(repositoryName string) error {
-	os.RemoveAll("/tmp/bitbucket_test")
+	os.RemoveAll(CLONE_DIR)
 	sshUrlRepository := ssh_url + "/" + project + "/" + repositoryName + ".git"
-    r, _ := git.PlainClone("/tmp/bitbucket_test", false, &git.CloneOptions{
+    git.PlainClone(CLONE_DIR, false, &git.CloneOptions{
         URL:      sshUrlRepository,
         Progress: os.Stdout,
     })
 
-    fmt.Println(r.Remotes())
+    // we don't chech the error here, because an empty repository returns an empty repository error
+    // CheckIfError(err)
+
+    Info("successfully cloned repo [%s]", repositoryName)
 
     return nil
 
@@ -155,13 +158,13 @@ func cloneRepo(repositoryName string) error {
 
 func commitFile() error {
 
-	r, err := git.PlainOpen("/tmp/bitbucket_test")
+	r, err := git.PlainOpen(CLONE_DIR)
 	CheckIfError(err)
 
 	w, err := r.Worktree()
 	CheckIfError(err)
 
-	filename := filepath.Join("/tmp/bitbucket_test", "example-git-file")
+	filename := filepath.Join(CLONE_DIR, "example-git-file")
 	err = ioutil.WriteFile(filename, []byte("this is test"), 0644)
 	CheckIfError(err)
 
@@ -203,7 +206,7 @@ func commitFile() error {
 
 func push() error {
 
-	r, err := git.PlainOpen("/tmp/bitbucket_test")
+	r, err := git.PlainOpen(CLONE_DIR)
 	CheckIfError(err)
 
 	Info("git push")
@@ -220,7 +223,7 @@ type Commit struct {
 
 func compareCommit(repositoryName string) error {
 
-	r, err := git.PlainOpen("/tmp/bitbucket_test")
+	r, err := git.PlainOpen(CLONE_DIR)
 	CheckIfError(err)
 
 	commitItr, err := r.CommitObjects()
