@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 	"time"
+	"errors"
 
-	"github.com/juju/errors"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
