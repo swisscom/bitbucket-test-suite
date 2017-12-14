@@ -139,7 +139,7 @@ func deleteRepository(repositoryName string) error {
 	return nil
 }
 
-func cloneRepo(repositoryName string) error {
+func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
 	git.PlainClone(cloneDir, false, &git.CloneOptions{
@@ -150,7 +150,7 @@ func cloneRepo(repositoryName string) error {
 	// we don't chech the error here, because an empty repository returns an empty repository error
 	// CheckIfError(err)
 
-	Info("[cloneRepo] successfully cloned repo [%s]", repositoryName)
+	Info("[cloneRepository] successfully cloned repo [%s]", repositoryName)
 
 	return nil
 
@@ -196,13 +196,13 @@ func commitFile() error {
 	return nil
 }
 
-func push() error {
+func pushRepository() error {
 
 	r, err := git.PlainOpen(cloneDir)
 	CheckIfError(err)
 
-	Info("[push] git push")
-	// push using default options
+	Info("[pushRepository] git pushRepository")
+	// pushRepository using default options
 	err = r.Push(&git.PushOptions{})
 	CheckIfError(err)
 
@@ -279,8 +279,8 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I create repository ([A-Za-z_-]+)$`, createRepository)
 	s.Step(`^repository ([A-Za-z_-]+) should be accessible$`, checkRepository)
 	s.Step(`^the repository ([A-Za-z_-]+) exists$`, createRepository)
-	s.Step(`^clone the ([A-Za-z_-]+)$`, cloneRepo)
+	s.Step(`^clone the ([A-Za-z_-]+)$`, cloneRepository)
 	s.Step(`^commit a file$`, commitFile)
-	s.Step(`^push to remote`, push)
+	s.Step(`^push to remote`, pushRepository)
 	s.Step(`^the commit should be visible in repository ([A-Za-z_-]+)$`, compareCommit)
 }
