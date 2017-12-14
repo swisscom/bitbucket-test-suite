@@ -6,8 +6,8 @@ Feature: bitbucket repositories
     Then repository test_repo should be accessible
 
   Scenario: user commits and pushes a file
-	Given the repository test_repo exists
-	When clone the test_repo
-	And commit a file
-	And push to remote
-	Then the commit should be visible in repository test_repo
+    Given the repository test_repo exists
+    When clone the test_repo
+    And commit a file
+    And push to remote
+    Then the commit should be visible in repository test_repo
