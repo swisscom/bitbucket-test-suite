@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
+	"github.com/juju/errors"
 )
 
 const HTTP_URL_KEY = "BB_HTTP_URL"
@@ -90,7 +91,7 @@ func createRepository(repositoryName string) error {
     }
     defer resp.Body.Close()
 
-    Info("created repository [%s] with status [%s]", repositoryName, resp.Status)
+    Info("[createRepository] created repository [%s] with status [%s]", repositoryName, resp.Status)
 	return nil
 }
 
@@ -101,7 +102,6 @@ type Repository struct {
 
 func checkRepository(repositoryName string) error {
 	urlRepoTest := urlRepos + "/" + repositoryName
-	fmt.Println("http_url test repo: " + urlRepoTest)
     req, err := http.NewRequest("GET", urlRepoTest, nil)
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("User-Agent", "golang")
@@ -118,13 +118,12 @@ func checkRepository(repositoryName string) error {
     if err != nil{
         panic(err)
     }
-    fmt.Println("got the repository: ", repository.Slug)
+    Info("[checkRepository] got the repository [%s]", repository.Slug)
     return nil
 }
 
 func deleteRepository(repositoryName string) error {
 	urlRepoTest := urlRepos + "/" + repositoryName
-    fmt.Println("http_url test repo: " + urlRepoTest)
     req, err := http.NewRequest("DELETE", urlRepoTest, nil)
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("User-Agent", "golang")
@@ -135,7 +134,7 @@ func deleteRepository(repositoryName string) error {
         panic(err)
     }
     defer resp.Body.Close()
-    fmt.Println("deleted repo with response status:", resp.Status)
+    Info("[deleteRepository] deleted repo [%s] with response status [%s]", repositoryName, resp.Status)
     return nil
 }
 
@@ -150,7 +149,7 @@ func cloneRepo(repositoryName string) error {
     // we don't chech the error here, because an empty repository returns an empty repository error
     // CheckIfError(err)
 
-    Info("successfully cloned repo [%s]", repositoryName)
+    Info("[cloneRepo] successfully cloned repo [%s]", repositoryName)
 
     return nil
 
@@ -169,21 +168,14 @@ func commitFile() error {
 	CheckIfError(err)
 
 	// Adds the new file to the staging area.
-	Info("git add example-git-file")
+	Info("[commitFile] git add example-git-file")
 	_, err = w.Add("example-git-file")
 	CheckIfError(err)
-
-	// We can verify the current status of the worktree using the method Status.
-	Info("git status --porcelain")
-	status, err := w.Status()
-	CheckIfError(err)
-
-	fmt.Println(status)
 
 	// Commits the current staging are to the repository, with the new file
 	// just created. We should provide the object.Signature of Author of the
 	// commit.
-	Info("git commit -m \"example go-git commit\"")
+	Info("[commitFile] git commit -m \"example go-git commit\"")
 	commit, err := w.Commit("example go-git commit", &git.CommitOptions{
 		Author: &object.Signature{
 			Name:  "BitBucket Test",
@@ -195,11 +187,10 @@ func commitFile() error {
 	CheckIfError(err)
 
 	// Prints the current HEAD to verify that all worked well.
-	Info("git show -s")
 	obj, err := r.CommitObject(commit)
 	CheckIfError(err)
 
-	fmt.Println(obj)
+	Info("[commitFile] got commit [%s]", obj)
 
 	return nil
 }
@@ -209,7 +200,7 @@ func push() error {
 	r, err := git.PlainOpen(CLONE_DIR)
 	CheckIfError(err)
 
-	Info("git push")
+	Info("[push] git push")
 	// push using default options
 	err = r.Push(&git.PushOptions{})
 	CheckIfError(err)
@@ -251,7 +242,14 @@ func compareCommit(repositoryName string) error {
     if err != nil{
         panic(err)
     }
-    fmt.Println("got remote commit: ", commitRemote.Id)
+    Info("[compareCommit] local commit id [%s], remote commit id [%s] ", commitId.String(), commitRemote.Id)
+
+    if commitId.String() != commitRemote.Id {
+    	Warning("[compareCommit] commit id's don't match")
+    	err := errors.New("commit id's don't match")
+    	panic(err)
+	}
+
     return nil
 }
 
