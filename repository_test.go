@@ -1,31 +1,32 @@
 package acceptance
 
 import (
-    "net/http"
-    "encoding/json"
-    "bytes"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"github.com/DATA-DOG/godog"
+	"net/http"
 	"os"
 	"testing"
 	"time"
-	"github.com/DATA-DOG/godog"
 
-    "gopkg.in/src-d/go-git.v4"
-	"path/filepath"
+	"github.com/juju/errors"
+	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
-	"github.com/juju/errors"
+	"path/filepath"
 )
 
-const HTTP_URL_KEY = "BB_HTTP_URL"
-const SSH_URL_KEY = "BB_SSH_URL"
-const PROJECT_KEY = "BB_PROJECT"
-const USER_KEY = "BB_USER"
-const PASSWORD_KEY = "BB_PASSWORD"
-const REPOSITORY_KEY = "BB_REPOSITORY"
-const CLONE_DIR = "/tmp/bitbucket_test"
-var http_url string
-var ssh_url string
+const httpUrlKey = "BB_HTTP_URL"
+const sshUrlKey = "BB_SSH_URL"
+const projectKey = "BB_PROJECT"
+const userKey = "BB_USER"
+const passwordKey = "BB_PASSWORD"
+const repositoryKey = "BB_REPOSITORY"
+const cloneDir = "/tmp/bitbucket_test"
+
+var httpUrl string
+var sshUrl string
 var project string
 var user string
 var password string
@@ -33,25 +34,25 @@ var repository string
 var urlRepos string
 
 func TestMain(m *testing.M) {
-    exitIfNotSet := func(env string, name string) {
-        if len(env) == 0 {
-            fmt.Println(name + " not set")
-            os.Exit(1)
-        }
-    }
-    http_url = os.Getenv(HTTP_URL_KEY)
-    exitIfNotSet(http_url, HTTP_URL_KEY)
-	ssh_url = os.Getenv(SSH_URL_KEY)
-	exitIfNotSet(ssh_url, SSH_URL_KEY)
-    project = os.Getenv(PROJECT_KEY)
-    exitIfNotSet(project, PROJECT_KEY)
-    user = os.Getenv(USER_KEY)
-    exitIfNotSet(user, USER_KEY)
-    password = os.Getenv(PASSWORD_KEY)
-    exitIfNotSet(password, PASSWORD_KEY)
-    repository = os.Getenv(REPOSITORY_KEY)
-    exitIfNotSet(repository, REPOSITORY_KEY)
-    urlRepos = http_url + "/rest/api/1.0/projects/" + project + "/repos"
+	exitIfNotSet := func(env string, name string) {
+		if len(env) == 0 {
+			fmt.Println(name + " not set")
+			os.Exit(1)
+		}
+	}
+	httpUrl = os.Getenv(httpUrlKey)
+	exitIfNotSet(httpUrl, httpUrlKey)
+	sshUrl = os.Getenv(sshUrlKey)
+	exitIfNotSet(sshUrl, sshUrlKey)
+	project = os.Getenv(projectKey)
+	exitIfNotSet(project, projectKey)
+	user = os.Getenv(userKey)
+	exitIfNotSet(user, userKey)
+	password = os.Getenv(passwordKey)
+	exitIfNotSet(password, passwordKey)
+	repository = os.Getenv(repositoryKey)
+	exitIfNotSet(repository, repositoryKey)
+	urlRepos = httpUrl + "/rest/api/1.0/projects/" + project + "/repos"
 
 	status := godog.RunWithOptions("repositories", func(s *godog.Suite) {
 		FeatureContext(s)
@@ -68,102 +69,102 @@ func TestMain(m *testing.M) {
 }
 
 type RepositoryCreation struct {
-	Name    	string `json:"name"`
-	ScmId   	string `json:"scmId"`
-	Forkable   	bool `json:"forkable"`
+	Name     string `json:"name"`
+	ScmId    string `json:"scmId"`
+	Forkable bool   `json:"forkable"`
 }
 
 func createRepository(repositoryName string) error {
 	repositoryCreation := RepositoryCreation{
-		Name: repositoryName,
-		ScmId: "git",
+		Name:     repositoryName,
+		ScmId:    "git",
 		Forkable: true,
 	}
 	repositoryCreationJson, _ := json.Marshal(repositoryCreation)
-    req, err := http.NewRequest("POST", urlRepos, bytes.NewBuffer(repositoryCreationJson))
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("User-Agent", "golang")
-    req.SetBasicAuth(user, password)
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	req, err := http.NewRequest("POST", urlRepos, bytes.NewBuffer(repositoryCreationJson))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "golang")
+	req.SetBasicAuth(user, password)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    Info("[createRepository] created repository [%s] with status [%s]", repositoryName, resp.Status)
+	Info("[createRepository] created repository [%s] with status [%s]", repositoryName, resp.Status)
 	return nil
 }
 
 type Repository struct {
-	Slug    string `json:"slug"`
-    ScmId   string `json:"scmId"`
+	Slug  string `json:"slug"`
+	ScmId string `json:"scmId"`
 }
 
 func checkRepository(repositoryName string) error {
 	urlRepoTest := urlRepos + "/" + repositoryName
-    req, err := http.NewRequest("GET", urlRepoTest, nil)
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("User-Agent", "golang")
-    req.SetBasicAuth(user, password)
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	req, err := http.NewRequest("GET", urlRepoTest, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "golang")
+	req.SetBasicAuth(user, password)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    repository := Repository{}
-    err = json.NewDecoder(resp.Body).Decode(&repository)
-    if err != nil{
-        panic(err)
-    }
-    Info("[checkRepository] got the repository [%s]", repository.Slug)
-    return nil
+	repository := Repository{}
+	err = json.NewDecoder(resp.Body).Decode(&repository)
+	if err != nil {
+		panic(err)
+	}
+	Info("[checkRepository] got the repository [%s]", repository.Slug)
+	return nil
 }
 
 func deleteRepository(repositoryName string) error {
 	urlRepoTest := urlRepos + "/" + repositoryName
-    req, err := http.NewRequest("DELETE", urlRepoTest, nil)
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("User-Agent", "golang")
-    req.SetBasicAuth(user, password)
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
-    Info("[deleteRepository] deleted repo [%s] with response status [%s]", repositoryName, resp.Status)
-    return nil
+	req, err := http.NewRequest("DELETE", urlRepoTest, nil)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "golang")
+	req.SetBasicAuth(user, password)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	Info("[deleteRepository] deleted repo [%s] with response status [%s]", repositoryName, resp.Status)
+	return nil
 }
 
 func cloneRepo(repositoryName string) error {
-	os.RemoveAll(CLONE_DIR)
-	sshUrlRepository := ssh_url + "/" + project + "/" + repositoryName + ".git"
-    git.PlainClone(CLONE_DIR, false, &git.CloneOptions{
-        URL:      sshUrlRepository,
-        Progress: os.Stdout,
-    })
+	os.RemoveAll(cloneDir)
+	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
+	git.PlainClone(cloneDir, false, &git.CloneOptions{
+		URL:      sshUrlRepository,
+		Progress: os.Stdout,
+	})
 
-    // we don't chech the error here, because an empty repository returns an empty repository error
-    // CheckIfError(err)
+	// we don't chech the error here, because an empty repository returns an empty repository error
+	// CheckIfError(err)
 
-    Info("[cloneRepo] successfully cloned repo [%s]", repositoryName)
+	Info("[cloneRepo] successfully cloned repo [%s]", repositoryName)
 
-    return nil
+	return nil
 
 }
 
 func commitFile() error {
 
-	r, err := git.PlainOpen(CLONE_DIR)
+	r, err := git.PlainOpen(cloneDir)
 	CheckIfError(err)
 
 	w, err := r.Worktree()
 	CheckIfError(err)
 
-	filename := filepath.Join(CLONE_DIR, "example-git-file")
+	filename := filepath.Join(cloneDir, "example-git-file")
 	err = ioutil.WriteFile(filename, []byte("this is test"), 0644)
 	CheckIfError(err)
 
@@ -197,7 +198,7 @@ func commitFile() error {
 
 func push() error {
 
-	r, err := git.PlainOpen(CLONE_DIR)
+	r, err := git.PlainOpen(cloneDir)
 	CheckIfError(err)
 
 	Info("[push] git push")
@@ -209,12 +210,12 @@ func push() error {
 }
 
 type Commit struct {
-	Id    string `json:"id"`
+	Id string `json:"id"`
 }
 
 func compareCommit(repositoryName string) error {
 
-	r, err := git.PlainOpen(CLONE_DIR)
+	r, err := git.PlainOpen(cloneDir)
 	CheckIfError(err)
 
 	commitItr, err := r.CommitObjects()
@@ -223,34 +224,34 @@ func compareCommit(repositoryName string) error {
 	commitLocal, err := commitItr.Next()
 	CheckIfError(err)
 
-	commitId :=	commitLocal.ID()
+	commitId := commitLocal.ID()
 	commitUrl := urlRepos + "/" + repositoryName + "/commits/" + commitId.String()
 
 	req, err := http.NewRequest("GET", commitUrl, nil)
-    req.Header.Set("Content-Type", "application/json")
-    req.Header.Set("User-Agent", "golang")
-    req.SetBasicAuth(user, password)
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        panic(err)
-    }
-    defer resp.Body.Close()
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "golang")
+	req.SetBasicAuth(user, password)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 
-    commitRemote := Commit{}
-    err = json.NewDecoder(resp.Body).Decode(&commitRemote)
-    if err != nil{
-        panic(err)
-    }
-    Info("[compareCommit] local commit id [%s], remote commit id [%s] ", commitId.String(), commitRemote.Id)
+	commitRemote := Commit{}
+	err = json.NewDecoder(resp.Body).Decode(&commitRemote)
+	if err != nil {
+		panic(err)
+	}
+	Info("[compareCommit] local commit id [%s], remote commit id [%s] ", commitId.String(), commitRemote.Id)
 
-    if commitId.String() != commitRemote.Id {
-    	Warning("[compareCommit] commit id's don't match")
-    	err := errors.New("commit id's don't match")
-    	panic(err)
+	if commitId.String() != commitRemote.Id {
+		Warning("[compareCommit] commit id's don't match")
+		err := errors.New("commit id's don't match")
+		panic(err)
 	}
 
-    return nil
+	return nil
 }
 
 // CheckIfError should be used to naively panics if an error is not nil.
