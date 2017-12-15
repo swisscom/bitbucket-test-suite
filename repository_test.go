@@ -15,6 +15,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
 	"path/filepath"
+	"os/exec"
 )
 
 const httpUrlKey = "BB_HTTP_URL"
@@ -197,15 +198,15 @@ func commitFile() error {
 }
 
 func pushRepository() error {
-
-	r, err := git.PlainOpen(cloneDir)
+	cmd := exec.Command("git", "push", "--set-upstream", "origin", "master")
+	cmd.Dir = cloneDir
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	Info("[pushRepository] " + out.String())
 	CheckIfError(err)
-
-	Info("[pushRepository] git pushRepository")
-	// pushRepository using default options
-	err = r.Push(&git.PushOptions{})
-	CheckIfError(err)
-
 	return nil
 }
 
