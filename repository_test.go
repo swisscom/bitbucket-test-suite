@@ -197,6 +197,8 @@ func commitFile() error {
 	return nil
 }
 
+// fallback to git command because of a bug in go-git
+// https://github.com/src-d/go-git/issues/637
 func pushRepository() error {
 	cmd := exec.Command("git", "push", "--set-upstream", "origin", "master")
 	cmd.Dir = cloneDir
