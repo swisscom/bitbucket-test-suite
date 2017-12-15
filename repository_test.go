@@ -207,7 +207,12 @@ func pushRepository() error {
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-	Info("[pushRepository] " + out.String())
+	if len(out.String()) > 0 {
+		Info("[pushRepository] " + out.String())
+	}
+	if len(stderr.String()) > 0 {
+		Warning("[pushRepository] " + stderr.String())
+	}
 	CheckIfError(err)
 	return nil
 }
