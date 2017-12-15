@@ -6,7 +6,8 @@ Feature: bitbucket repositories
     Then repository test_repo should be accessible
 
   Scenario: user commits and pushes a file
-    Given the repository test_repo exists
+    Given the repository test_repo doesnt exist
+    Given I create repository test_repo
     When clone the test_repo
     And commit a file
     And push to remote

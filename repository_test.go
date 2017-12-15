@@ -286,7 +286,6 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^the repository ([A-Za-z_-]+) doesnt exist$`, deleteRepository)
 	s.Step(`^I create repository ([A-Za-z_-]+)$`, createRepository)
 	s.Step(`^repository ([A-Za-z_-]+) should be accessible$`, checkRepository)
-	s.Step(`^the repository ([A-Za-z_-]+) exists$`, createRepository)
 	s.Step(`^clone the ([A-Za-z_-]+)$`, cloneRepository)
 	s.Step(`^commit a file$`, commitFile)
 	s.Step(`^push to remote`, pushRepository)
