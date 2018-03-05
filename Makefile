@@ -3,6 +3,7 @@
 install-dependencies: ## install the go dependencies
 	@go get github.com/DATA-DOG/godog/cmd/godog
 	@go get -u gopkg.in/src-d/go-git.v4/...
+	@go get github.com/satori/go.uuid
 
 execute-test-suite: ## execute the bitbucket testsuite
 	@go test

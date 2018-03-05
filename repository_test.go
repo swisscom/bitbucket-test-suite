@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 	"errors"
-
+	"github.com/satori/go.uuid"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
@@ -165,13 +165,14 @@ func commitFile() error {
 	w, err := r.Worktree()
 	CheckIfError(err)
 
-	filename := filepath.Join(cloneDir, "example-git-file")
-	err = ioutil.WriteFile(filename, []byte("this is test"), 0644)
+	filename := "example-git-file-" + uuid.Must(uuid.NewV4()).String()
+	filewithpath := filepath.Join(cloneDir, filename)
+	err = ioutil.WriteFile(filewithpath, []byte("this is a test"), 0644)
 	CheckIfError(err)
 
 	// Adds the new file to the staging area.
-	Info("[commitFile] git add example-git-file")
-	_, err = w.Add("example-git-file")
+	Info("[commitFile] git add "+filename)
+	_, err = w.Add(filename)
 	CheckIfError(err)
 
 	// Commits the current staging are to the repository, with the new file
@@ -286,6 +287,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^the repository ([A-Za-z_-]+) doesnt exist$`, deleteRepository)
 	s.Step(`^I create repository ([A-Za-z_-]+)$`, createRepository)
 	s.Step(`^repository ([A-Za-z_-]+) should be accessible$`, checkRepository)
+	s.Step(`^repository ([A-Za-z_-]+) is accessible$`, checkRepository)
 	s.Step(`^clone the ([A-Za-z_-]+)$`, cloneRepository)
 	s.Step(`^commit a file$`, commitFile)
 	s.Step(`^push to remote`, pushRepository)
