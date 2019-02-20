@@ -143,22 +143,18 @@ func deleteRepository(repositoryName string) error {
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
+	git.PlainClone(cloneDir, false, &git.CloneOptions{
+		URL:      sshUrlRepository,
+		Progress: os.Stdout,
+	})
 
-	cmd := exec.Command("git", "clone", sshUrlRepository, "bitbucket_test")
-	cmd.Dir = "/tmp"
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if len(out.String()) > 0 {
-		Info("[clonRepository] " + out.String())
-	}
-	if len(stderr.String()) > 0 {
-		Warning("[cloneRepository] " + stderr.String())
-	}
-	CheckIfError(err)
+	// we don't chech the error here, because an empty repository returns an empty repository error
+	// CheckIfError(err)
+
+	Info("[cloneRepository] successfully cloned repo [%s]", repositoryName)
+
 	return nil
+
 }
 
 func commitFile() error {
