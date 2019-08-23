@@ -10,8 +10,10 @@ import (
 	"testing"
 	"time"
 	"errors"
+	ssh2 "golang.org/x/crypto/ssh"
 
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"io/ioutil"
 	"path/filepath"
@@ -143,10 +145,13 @@ func deleteRepository(repositoryName string) error {
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
+	var auth transport.AuthMethod
+	auth.(*ssh.PublicKeys).HostKeyCallback = ssh2.InsecureIgnoreHostKey()
 	Info("[cloneRepository] Repo URL [%s]", sshUrlRepository)
 	_, err := git.PlainClone(cloneDir, true, &git.CloneOptions{
 		URL:      sshUrlRepository,
 		Progress: os.Stdout,
+		Auth: auth,
 	})
 
 	// we don't chech the error here, because an empty repository returns an empty repository error
