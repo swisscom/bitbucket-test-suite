@@ -145,12 +145,14 @@ func deleteRepository(repositoryName string) error {
 
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
-	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
-	var auth transport.AuthMethod
-	auth.(*ssh.PublicKeys).HostKeyCallback = ssh2.InsecureIgnoreHostKey()
-	Info("[cloneRepository] Repo URL [%s]", sshUrlRepository)
+	httpUrlRepository := httpUrl + "/scm/" + project + "/" + repositoryName + ".git"
+	auth := &http.BasicAuth{
+			Username: user, 
+			Password: password,
+		}
+	Info("[cloneRepository] Repo URL [%s]", httpUrlRepository)
 	_, err := git.PlainClone(cloneDir, true, &git.CloneOptions{
-		URL:      sshUrlRepository,
+		URL:      httpUrlRepository,
 		Progress: os.Stdout,
 		Auth: auth,
 	})
