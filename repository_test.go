@@ -10,10 +10,9 @@ import (
 	"testing"
 	"time"
 	"errors"
-	ssh2 "golang.org/x/crypto/ssh"
 
 	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
+	http2 "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"io/ioutil"
 	"path/filepath"
 	"os/exec"
@@ -144,7 +143,7 @@ func deleteRepository(repositoryName string) error {
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	httpUrlRepository := httpUrl + "/scm/" + project + "/" + repositoryName + ".git"
-	auth := &http.BasicAuth{
+	auth := &http2.BasicAuth{
 			Username: user, 
 			Password: password,
 		}
