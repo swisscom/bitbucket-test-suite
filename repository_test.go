@@ -149,14 +149,14 @@ func cloneRepository(repositoryName string) error {
 			Password: password,
 		}
 	Info("[cloneRepository] Repo URL [%s]", httpUrlRepository)
-	_, err := git.PlainClone(cloneDir, true, &git.CloneOptions{
+	git.PlainClone(cloneDir, false, &git.CloneOptions{
 		URL:      httpUrlRepository,
 		Progress: os.Stdout,
 		Auth: auth,
 	})
 
 	// we don't chech the error here, because an empty repository returns an empty repository error
-	CheckIfError(err)
+	//CheckIfError(err)
 
 	Info("[cloneRepository] successfully cloned repo [%s]", repositoryName)
 
