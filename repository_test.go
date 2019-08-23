@@ -13,9 +13,7 @@ import (
 	ssh2 "golang.org/x/crypto/ssh"
 
 	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"io/ioutil"
 	"path/filepath"
 	"os/exec"
