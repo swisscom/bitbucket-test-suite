@@ -22,7 +22,7 @@ const httpUrlKey = "BB_HTTP_URL"
 const sshUrlKey = "BB_SSH_URL"
 const projectKey = "BB_PROJECT"
 const userKey = "BB_CREDENTIALS_USR"
-const passwordKey = "BB_CREDENTIALS_PWD"
+const passwordKey = "BB_CREDENTIALS_PSW"
 const repositoryKey = "BB_REPOSITORY"
 const cloneDir = "/tmp/bitbucket_test"
 
