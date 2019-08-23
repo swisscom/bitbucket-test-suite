@@ -143,6 +143,7 @@ func deleteRepository(repositoryName string) error {
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	sshUrlRepository := sshUrl + "/" + project + "/" + repositoryName + ".git"
+	Info("[cloneRepository] Repo URL [%s]", sshUrlRepository)
 	git.PlainClone(cloneDir, false, &git.CloneOptions{
 		URL:      sshUrlRepository,
 		Progress: os.Stdout,
@@ -285,7 +286,7 @@ func Warning(format string, args ...interface{}) {
 func FeatureContext(s *godog.Suite) {
 	s.Step(`^the repository ([A-Za-z_-]+) doesnt exist$`, deleteRepository)
 	s.Step(`^I create repository ([A-Za-z_-]+)$`, createRepository)
-	s.Step(`^repository ([A-Za-z_-]+) should be accessible$`, checkRepository)
+	s.Step(`^repository ([A-Za-z_-]+) is accessible$`, checkRepository)
 	s.Step(`^clone the ([A-Za-z_-]+)$`, cloneRepository)
 	s.Step(`^commit a file$`, commitFile)
 	s.Step(`^push to remote`, pushRepository)
