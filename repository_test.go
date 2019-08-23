@@ -13,7 +13,6 @@ import (
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
-	http2 "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"io/ioutil"
 	"path/filepath"
 	"os/exec"
@@ -144,19 +143,9 @@ func deleteRepository(repositoryName string) error {
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
 	httpUrlRepository := httpUrl + "/scm/" + project + "/" + repositoryName + ".git"
-	auth := &http2.BasicAuth{
-			Username: user, 
-			Password: password,
-		}
-	Info("[cloneRepository] Repo URL [%s]", httpUrlRepository)
-	git.PlainClone(cloneDir, false, &git.CloneOptions{
-		URL:      httpUrlRepository,
-		Progress: os.Stdout,
-		Auth: auth,
-	})
+	_, err := exec.Command("git", "clone", httpUrlRepository, cloneDir).Output()
 
-	// we don't chech the error here, because an empty repository returns an empty repository error
-	//CheckIfError(err)
+	CheckIfError(err)
 
 	Info("[cloneRepository] successfully cloned repo [%s]", repositoryName)
 
