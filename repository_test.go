@@ -12,6 +12,7 @@ import (
 	"errors"
 
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	http2 "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"io/ioutil"
 	"path/filepath"
