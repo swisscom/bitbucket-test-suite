@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 	"errors"
+	"net/url"
 
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
@@ -142,8 +143,12 @@ func deleteRepository(repositoryName string) error {
 
 func cloneRepository(repositoryName string) error {
 	os.RemoveAll(cloneDir)
-	httpUrlRepository := httpUrl + "/scm/" + project + "/" + repositoryName + ".git"
-	_, err := exec.Command("git", "clone", httpUrlRepository, cloneDir).Output()
+	url, err := url.Parse(httpUrl)
+	CheckIfError(err)
+
+	httpUrlRepository := url.Scheme + "://" + user + ":" + password + "@" + url.Hostname() + ":" + url.Port() + "/scm/" + project + "/" + repositoryName + ".git"
+
+	_, err = exec.Command("git", "clone", httpUrlRepository, cloneDir).Output()
 
 	CheckIfError(err)
 
