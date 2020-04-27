@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/DATA-DOG/godog"
+	"github.com/cucumber/godog"
 	"net/http"
 	"os"
 	"testing"
