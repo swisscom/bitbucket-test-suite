@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 install-dependencies: ## install the go dependencies
-	GO111MODULE=on go get github.com/DATA-DOG/godog/cmd/godog@v0.9.0
+	GO111MODULE=on go get github.com/cucumber/godog/cmd/godog@v0.9.0
 	go get -u gopkg.in/src-d/go-git.v4/...
 
 execute-test-suite: ## execute the bitbucket testsuite
